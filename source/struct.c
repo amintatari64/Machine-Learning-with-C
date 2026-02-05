@@ -17,11 +17,12 @@ void weights_free(Weights *weights)
 // dataset->data[row][column]
 Dataset dataset_new_raw(int max_rows, int max_cols)
 {
-    double** data = malloc(sizeof(double*) * max_rows);
+    double **data = malloc(sizeof(double *) * max_rows);
     for (int i = 0; i < max_rows; i++)
     {
-        data[i] = malloc(sizeof(double) * max_cols); 
+        data[i] = malloc(sizeof(double) * max_cols);
     }
+    return (Dataset){.data = data, .max_rows = max_rows, .max_cols = max_cols};
 }
 void dataset_free(Dataset *dataset)
 {

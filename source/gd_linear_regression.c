@@ -87,9 +87,3 @@ void linear_regression(Dataset *data, Weights *weights_init)
         weights_init->weights_out[j] = weights[j];
     }
 }
-
-int main(void)
-{
-    printf("Hello, World!\n");
-    return 0;
-}
