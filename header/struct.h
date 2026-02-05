@@ -1,14 +1,17 @@
 #ifndef STRUCT_H
 #define STRUCT_H
 
+
+
 // dataset->data[row][column]
 typedef struct
 {
     int max_rows;
     int max_cols;
     double **data;
-    double *mean_values;
-    double *median_values;
+    double *mean_values; // میانگین
+    double *median_values; // میانه
+    double *mode_values;
     double *max_values;
     double *min_values;
 } Dataset;
