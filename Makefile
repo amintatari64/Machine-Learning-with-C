@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -g
-TARGET = program
+TARGET = program.out
 
 # Directory setup
 SRC_DIR = source
@@ -23,9 +23,11 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -I./header -c $< -o $@
 
 clean:
-	rm -f $(TARGET) $(BUILD_DIR)
+	rm -rf $(TARGET) $(BUILD_DIR)
 
 run: $(TARGET)
 	./$(TARGET)
+
+compile-run: all run
 
 .PHONY: all clean run
