@@ -41,7 +41,7 @@ Dataset* read_from_stream_to_dataset(
 ) {
     FILE* fp = stream;
     if (!fp) {
-        fprintf(stderr, "Error: cannot open file %s\n", stream);
+        fprintf(stderr, "Error: cannot open file\n");
         return NULL;
     }
 

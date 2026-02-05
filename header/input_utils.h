@@ -1,4 +1,5 @@
 #include <struct.h>
+#include <stdio.h>
 
 #ifndef INPUT_U_H
 #define INPUT_U_H
