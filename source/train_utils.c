@@ -1,5 +1,16 @@
-#include <stdio.h>
-#include <struct.h>
+#include<train_utils.h>
+
+void dataset_split_train_test(Dataset* dataset, Dataset** train_data_set, Dataset** test_data_set, float train_ratio) {
+    
+}
+
+void dataset_normalize_min_max(Dataset* dataset) {
+
+}
+
+void dataset_update_parameters(Dataset* dataset) {
+    
+}
 
 void linear_regression_calculate_weights(Dataset *data, Weights *weights_init)
 {

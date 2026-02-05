@@ -26,6 +26,5 @@ void weights_free(Weights *weights);
 
 Dataset dataset_new(int max_rows, int max_cols);
 void dataset_free(Dataset *dataset);
-void updateDatasetParameters(Dataset *dataset);
 
 #endif
