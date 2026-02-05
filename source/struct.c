@@ -15,14 +15,19 @@ void weights_free(Weights *weights)
 }
 
 // dataset->data[row][column]
-Dataset dataset_new_raw(int max_rows, int max_cols)
+Dataset dataset_new(int max_rows, int max_cols)
 {
     double **data = malloc(sizeof(double *) * max_rows);
     for (int i = 0; i < max_rows; i++)
     {
         data[i] = malloc(sizeof(double) * max_cols);
     }
-    return (Dataset){.data = data, .max_rows = max_rows, .max_cols = max_cols};
+    Dataset d = (Dataset){.data = data, .max_rows = max_rows, .max_cols = max_cols};
+    d.median_values = malloc(sizeof(double) * max_cols); // میانه
+    d.mean_values = malloc(sizeof(double) * max_cols); // میانگین
+    d.max_values = malloc(sizeof(double) * max_cols); // ماکزیمم
+    d.min_values = malloc(sizeof(double) * max_cols); // مینیمم
+    return d;
 }
 void dataset_free(Dataset *dataset)
 {
@@ -31,4 +36,16 @@ void dataset_free(Dataset *dataset)
         free(dataset->data[i]);
     }
     free(dataset->data);
+}
+
+void dataset_split_train_test(Dataset* dataset, Dataset** train_data_set, Dataset** test_data_set, float train_ratio) {
+    
+}
+
+void dataset_normalize_min_max(Dataset* dataset) {
+
+}
+
+void dataset_update_parameters(Dataset* dataset) {
+
 }

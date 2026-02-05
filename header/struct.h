@@ -7,6 +7,10 @@ typedef struct
     int max_rows;
     int max_cols;
     double **data;
+    double *mean_values;
+    double *median_values;
+    double *max_values;
+    double *min_values;
 } Dataset;
 
 typedef struct
@@ -20,8 +24,8 @@ typedef struct
 Weights weights_new(double learning_rate, int epochs, int feature_count);
 void weights_free(Weights *weights);
 
-Dataset dataset_new_raw(int max_rows, int max_cols);
+Dataset dataset_new(int max_rows, int max_cols);
 void dataset_free(Dataset *dataset);
-
+void updateDatasetParameters(Dataset *dataset);
 
 #endif
