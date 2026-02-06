@@ -4,11 +4,11 @@
 #ifndef INPUT_U_H
 #define INPUT_U_H
 
-typedef struct {
-    char** ohe_values; // {"A" , "B" , "C"}
-    int count; // 3
+typedef struct
+{
+    char **ohe_values; // {"A" , "B" , "C"}
+    int count;         // 3
 } OHE_Column;
-
 
 // read_from_csv_to_dataset("housingprices.csv",
 //             (int[]){9, 10},
@@ -18,12 +18,20 @@ typedef struct {
 // });
 
 // including one hot encouding
-Dataset* read_from_csv_to_dataset(const char* csv_file, int* ohe_indexes, int ohe_count, const OHE_Column* ohe_maps);
-Dataset* read_from_stream_to_dataset(
-    FILE* stream,
-    int* ohe_indexes,
+Dataset *read_from_csv_to_dataset(
+    const char *csv_file,
+    int *ohe_indexes,
     int ohe_count,
-    const OHE_Column* ohe_maps
+    const OHE_Column *ohe_maps,
+    char ***column_names,
+    int *column_count);
+Dataset *read_from_stream_to_dataset(
+    FILE *stream,
+    int *ohe_indexes,
+    int ohe_count,
+    const OHE_Column *ohe_maps,
+    char ***columnNames,
+    int* column_count
 );
 
 #endif

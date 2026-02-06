@@ -23,4 +23,6 @@ void dataset_split_train_test(Dataset* dataset, Dataset** train_data_set, Datase
 // size: dataset->max_rows - 1
 void convert_to_normalized(Dataset* dataset, double* normalization_ratios, double* normalization_biases);
 
+void analyze_points(const double *x, const double *y, int n, double *slope, double *intercept, double *correlation);
+
 #endif
