@@ -4,7 +4,7 @@
 #include <string.h>
 #include <ctype.h>
 
-// پیدا کردن ستون های دسته بندی
+
 static int find_ohe_index(const int *ohe_indexes, int ohe_count, int col)
 {
     for (int i = 0; i < ohe_count; i++)
@@ -13,7 +13,6 @@ static int find_ohe_index(const int *ohe_indexes, int ohe_count, int col)
     return -1;
 }
 
-// پیدا کردن شماره ستون برای ۱ کردن آن مقدار در دیتاست
 static int find_category_index(const OHE_Column *col, const char *value)
 {
     for (int i = 0; i < col->count; i++)
