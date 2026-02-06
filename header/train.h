@@ -5,7 +5,13 @@
 
 void linear_regression_calculate_weights(Dataset *data, Weights *weights_init);
 
-// @amintatari64
-void calculate_model_performance_metrics(int *MSE, int *MAPE, Dataset *test_dataset_normalized, Weights *model);
+
+void calculate_model_performance_metrics(
+        int *MSE,
+        int *MAPE,
+        Dataset *test_dataset_normalized,
+        Weights *model,
+        int y_index
+)
 
 #endif
