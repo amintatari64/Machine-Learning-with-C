@@ -11,7 +11,7 @@ void dataset_normalize_min_max(
         return;
     }
 
-    const int max_rows = dataset->max_rows - 1 ;
+    const int max_rows = dataset->max_rows;
     const int num_features = dataset->max_cols - 1;
 
     for (int col = 0; col < num_features; col++) {
