@@ -1,5 +1,9 @@
 #include<preprocess.h>
 
+void dataset_split_train_test(Dataset *dataset, Dataset **train_data_set, Dataset **test_data_set, float train_ratio) {
+
+}
+
 void dataset_normalize_min_max(
         Dataset* dataset,
         double* normalization_ratios,

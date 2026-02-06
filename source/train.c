@@ -2,10 +2,6 @@
 #include <math.h>
 
 
-void dataset_split_train_test(Dataset *dataset, Dataset **train_data_set, Dataset **test_data_set, float train_ratio) {
-
-}
-
 
 //void dataset_update_parameters(Dataset* dataset) {
 //
