@@ -2,12 +2,8 @@
 #include <math.h>
 
 
-
-//void dataset_update_parameters(Dataset* dataset) {
-//
-//}
-
-void linear_regression_calculate_weights(Dataset *data, Weights *weights_init) {
+void linear_regression_calculate_weights(Dataset *data, Weights *weights_init)
+{
 
     const int learning_rate = weights_init->learning_rate, epochs = weights_init->epochs;
 
