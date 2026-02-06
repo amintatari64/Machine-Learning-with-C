@@ -48,6 +48,9 @@ void dataset_normalize_min_max(
                 dataset->data[row][col] =
                         dataset->data[row][col] * ratio + bias;
             }
+        }else{
+            normalization_ratios[col] = 1;
+            normalization_biases[col] = 0;
         }
     }
 }
@@ -62,7 +65,7 @@ void convert_to_normalized(
     }
 
     const int max_rows = dataset->max_rows;
-    const int num_features = dataset->max_cols - 1;
+    const int num_features = dataset->max_cols;
 
     for (int col = 0; col < num_features; col++) {
         const double ratio = normalization_ratios[col];
