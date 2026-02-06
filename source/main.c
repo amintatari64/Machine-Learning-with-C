@@ -53,5 +53,14 @@ int main(void)
         &column_names,
         &column_count);
 
+    double ratio[d->max_cols];
+    double bias[d->max_cols];
+
+    // dataset_normalize_min_max(d, ratio, bias);
+
+    // printf("%d\n", ratio[7]);
+
+    draw_price_columns(d, column_names, column_count);
+
     return 0;
 }

@@ -34,8 +34,7 @@ Dataset *read_from_csv_to_dataset(
     int ohe_count,
     const OHE_Column *ohe_maps,
     char ***columnNames,
-    int* count
-)
+    int *count)
 {
     return read_from_stream_to_dataset(fopen(csv_file, "r"), ohe_indexes, ohe_count, ohe_maps, columnNames, count);
 }
@@ -47,8 +46,7 @@ Dataset *read_from_stream_to_dataset(
     int ohe_count,
     const OHE_Column *ohe_maps,
     char ***columnNames,
-    int* count
-)
+    int *count)
 {
     FILE *fp = stream;
     if (!fp)
@@ -90,7 +88,6 @@ Dataset *read_from_stream_to_dataset(
     {
         *count = final_cols;
     }
-    
 
     if (columnNames)
     {
@@ -131,7 +128,6 @@ Dataset *read_from_stream_to_dataset(
         }
 
         *columnNames = str_array;
-
     }
 
     Dataset *d = dataset_new(row_count, final_cols);
@@ -139,13 +135,32 @@ Dataset *read_from_stream_to_dataset(
     int row = 0;
     while (fgets(line, sizeof(line), fp))
     {
-
-        // remove \n from str
-        line[strlen(line) - 1] = '\0';
+        line[strcspn(line, "\n")] = '\0';
 
         int col = 0;
         int out_col = 0;
+        int bad_row = 0;
 
+        // copy from line to count tokens
+        char temp[4096];
+        strcpy(temp, line);
+
+        // counting the tokens
+        int token_count = 0;
+        char *t = strtok(temp, ",");
+        while (t)
+        {
+            token_count++;
+            t = strtok(NULL, ",");
+        }
+
+        // skip if there is no prper tokens
+        if (token_count != col_count)
+        {
+            continue;
+        }
+
+        // start parsing the row
         char *token = strtok(line, ",");
         while (token)
         {
@@ -153,8 +168,12 @@ Dataset *read_from_stream_to_dataset(
 
             if (ohe_id >= 0)
             {
-                // OHE column
                 int cat_index = find_category_index(&ohe_maps[ohe_id], token);
+                if (cat_index < 0)
+                {
+                    bad_row = 1;
+                    break;
+                }
 
                 for (int k = 0; k < ohe_maps[ohe_id].count; k++)
                     d->data[row][out_col + k] = (k == cat_index) ? 1.0 : 0.0;
@@ -165,11 +184,10 @@ Dataset *read_from_stream_to_dataset(
             {
                 if (token[0] == '\0')
                 {
-                    row--;
+                    bad_row = 1;
                     break;
                 }
 
-                // numeric column
                 d->data[row][out_col] = atof(token);
                 out_col++;
             }
@@ -178,7 +196,8 @@ Dataset *read_from_stream_to_dataset(
             col++;
         }
 
-        row++;
+        if (!bad_row)
+            row++;
     }
 
     d->max_rows = row;

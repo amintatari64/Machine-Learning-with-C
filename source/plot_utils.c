@@ -21,7 +21,6 @@ void plot_points_with_regression(const double *x, const double *y, const double 
         fprintf(gp, "set title '%s\n", title);
     }
 
-    fprintf(gp, "set title '%s'\n", title, correlation);
     fprintf(gp, "set terminal qt noenhanced\n");
     fprintf(gp, "set xlabel '%s'\n", x_lable);
     fprintf(gp, "set ylabel '%s'\n", y_label);

@@ -12,6 +12,6 @@ void calculate_model_performance_metrics(
         Dataset *test_dataset_normalized,
         Weights *model,
         int y_index
-)
+);
 
 #endif
