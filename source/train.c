@@ -124,7 +124,7 @@ void predict_prices_from_dataset(
 ) {
     // Validate pointers
     if (!test_dataset_normalized || !model || !model->weights_out || !y_pred_prices) {
-        return 0;
+        return;
     }
 
     const int rows = test_dataset_normalized->max_rows;
@@ -132,10 +132,8 @@ void predict_prices_from_dataset(
 
     // Validate dataset dimensions and y index
     if (rows <= 0 || cols <= 1 ) {
-        return 0;
+        return;
     }
-
-    const int num_features = cols;
 
     // Assumption: model->weights_out has exactly num_features elements
     for (int i = 0; i < rows; i++) {

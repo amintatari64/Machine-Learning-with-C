@@ -109,6 +109,61 @@ void check_model_performance(Dataset *test_ds, Weights *weights_model, double *n
     wait_for_enter_key("continue");
 }
 
+void custom_home_price_prediction(
+    Weights *weights_model,
+    double *normalization_ratios,
+    double *normalization_biases,
+    char **column_names,
+    int data_count,
+    int price_column_i)
+{
+    if (!weights_model)
+    {
+        printf("Weights model not calculated yet. Please calculate the model with (3) first.\n");
+        flush_stdin();
+        wait_for_enter_key("continue");
+        return;
+    }
+
+    printf("\nCustom Home Price Prediction\n");
+    printf("Enter values for each feature:\n\n");
+
+    double input_row[data_count];
+
+    for (int i = 0; i < data_count; i++)
+    {
+        if (i == price_column_i)
+        {
+            continue;
+        }
+
+        printf("%s : ", column_names[i]);
+        scanf("%lf", &input_row[i]);
+        flush_stdin();
+    }
+
+    // normalize
+    double normalized_row[data_count];
+    for (int i = 0; i < data_count; i++)
+    {
+        normalized_row[i] =
+            input_row[i] * normalization_ratios[i] + normalization_biases[i];
+    }
+
+    double predicted = weights_model->bias_out;
+    for (int i = 0; i < data_count; i++)
+    {
+        if (i != price_column_i)
+        {
+            predicted += normalized_row[i] * weights_model->weights_out[i];
+        }
+    }
+
+    printf("\nPredicted price = %lf\n", predicted);
+
+    wait_for_enter_key("continue");
+}
+
 int command_loop()
 {
     const int price_column_i = 8;
@@ -139,7 +194,8 @@ int command_loop()
                "2. Make and load the train and test dataset\n"
                "3. Find weights and produce the model with gradian decent - linear regression\n"
                "4. Check the model performance and percision\n"
-               "5. Exit\n\n");
+               "5. Custom home price prediction\n"
+               "6. Exit\n\n");
 
         printf(":: ");
 
@@ -161,6 +217,16 @@ int command_loop()
             check_model_performance(test_ds, weights_model, normalization_ratios, normalization_biases, price_column_i);
             break;
         case 5:
+            custom_home_price_prediction(
+                weights_model,
+                normalization_ratios,
+                normalization_biases,
+                column_names,
+                main_ds->max_cols,
+                price_column_i);
+            break;
+
+        case 6:
             continue_run = 0;
             break;
 
@@ -180,12 +246,16 @@ int command_loop()
     if (weights_model)
         weights_free(weights_model);
 
+    for (int i = 0; i < main_ds->max_cols; i++)
+    {
+        free(column_names[i]);
+    }
+    free(column_names);
+
     return 0;
 }
 
 int main()
 {
     command_loop();
-    // double x[5] = {1, 2, 3, 4, 5}, y[5] = {1,2.2,2.7,2.8,5.2};
-    // plot_actual_vs_predicted(x, y, 5, 0.5, 0.5);
 }
