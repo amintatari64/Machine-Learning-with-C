@@ -1,6 +1,6 @@
 #include <train.h>
 #include <math.h>
-
+#include <input_utils.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>

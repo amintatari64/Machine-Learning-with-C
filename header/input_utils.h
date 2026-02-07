@@ -35,7 +35,7 @@ void wait_for_enter_key(const char *message);
 
 int cross_platform_kbhit(void);
 
-char get_key_pressed(void);
+char get_key_pressed();
 void flush_stdin();
 
 #endif

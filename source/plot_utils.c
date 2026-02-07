@@ -4,6 +4,43 @@
 #include <preprocess.h>
 #include <input_utils.h>
 
+#include <stdio.h>
+
+void plot_actual_vs_predicted(double *x_real, double *y_pred, int count, double mse, double mape)
+{
+    FILE *gp = popen("gnuplot", "w");
+    if (!gp)
+    {
+        fprintf(stderr, "Error: could not open gnuplot\n");
+        return;
+    }
+
+    fprintf(gp, "set terminal qt noenhanced\n");
+    fprintf(gp, "set title 'Actual vs Predicted'\n");
+    fprintf(gp, "set xlabel 'Actual Values'\n");
+    fprintf(gp, "set ylabel 'Predicted Values'\n");
+    fprintf(gp, "set grid\n");
+
+    fprintf(gp, "set label 1 sprintf('MSE = %.6f', %f) at graph 0.02, 0.05\n", mse, mse);
+    fprintf(gp, "set label 2 sprintf('MAPE = %.6f', %f) at graph 0.02, 0.10\n", mape, mape);
+
+    fprintf(gp, "plot x title 'y = x' with lines lw 2 lc rgb 'red', '-' using 1:2 with points pt 7 ps 1.2 lc rgb 'blue' notitle\n");
+
+    for (int i = 0; i < count; i++)
+    {
+        fprintf(gp, "%lf %lf\n", x_real[i], y_pred[i]);
+    }
+
+    fprintf(gp, "e\n");
+
+    fflush(gp);
+
+    flush_stdin();
+    wait_for_enter_key("close plot");
+
+    pclose(gp);
+}
+
 void plot_price_versus_features(Dataset *d, char **column_names, const int price_column_i)
 {
 

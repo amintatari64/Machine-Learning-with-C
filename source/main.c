@@ -86,10 +86,8 @@ void check_model_performance(Dataset *test_ds, Weights *weights_model, double *n
     wait_for_enter_key("continue");
 }
 
-// @mhrohani1385
-int main(void)
+int command_loop()
 {
-
     const int price_column_i = 8;
 
     char **column_names;
@@ -160,4 +158,11 @@ int main(void)
         weights_free(weights_model);
 
     return 0;
+}
+
+int main()
+{
+    command_loop();
+    // double x[5] = {1, 2, 3, 4, 5}, y[5] = {1,2.2,2.7,2.8,5.2};
+    // plot_actual_vs_predicted(x, y, 5, 0.5, 0.5);
 }
