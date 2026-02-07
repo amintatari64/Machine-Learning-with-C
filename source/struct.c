@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <assert.h>
 
-Weights *weights_new(double learning_rate, int epochs, int feature_count)
+Weights *weights_new(double learning_rate, int epochs, int count)
 {
-    double *weights = (double *)malloc(sizeof(double) * feature_count);
+    double *weights = (double *)malloc(sizeof(double) * count);
     Weights *w = malloc(sizeof(Weights));
     *w = (Weights){
         .learning_rate = learning_rate,

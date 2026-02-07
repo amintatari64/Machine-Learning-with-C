@@ -23,15 +23,19 @@ Dataset *read_from_csv_to_dataset(
     int *ohe_indexes,
     int ohe_count,
     const OHE_Column *ohe_maps,
-    char ***column_names,
-    int *column_count);
+    char ***column_names);
 Dataset *read_from_stream_to_dataset(
     FILE *stream,
     int *ohe_indexes,
     int ohe_count,
     const OHE_Column *ohe_maps,
-    char ***columnNames,
-    int* column_count
-);
+    char ***columnNames);
+
+void wait_for_enter_key(const char *message);
+
+int cross_platform_kbhit(void);
+
+char get_key_pressed(void);
+void flush_stdin();
 
 #endif

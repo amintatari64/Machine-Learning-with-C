@@ -1,81 +1,111 @@
 #include <preprocess.h>
 #include <stdlib.h>
+#include<math.h>
 #include <time.h>
 
-void dataset_normalize_min_max(
-        Dataset* dataset,
-        double* normalization_ratios,
-        double* normalization_biases,
-        int price_index
-) {
-    if (!dataset || !dataset->data || dataset->max_rows <= 0 || dataset->max_cols <= 1) {
-        return;
+static Dataset *copy_dataset(Dataset *src)
+{
+    Dataset *dataset = dataset_new(src->max_rows, src->max_cols);
+    for (int i = 0; i < src->max_rows; i++)
+    {
+        dataset_copy_row(src, dataset, i, i);
     }
+    return dataset;
+}
+
+Dataset* dataset_normalize_min_max(
+    Dataset *not_normalized_ds,
+    double *normalization_ratios,
+    double *normalization_biases,
+    int price_index)
+{
+
+    if (!not_normalized_ds || !not_normalized_ds->data || not_normalized_ds->max_rows <= 0 || not_normalized_ds->max_cols <= 1)
+    {
+        return not_normalized_ds;
+    }
+    Dataset* dataset = copy_dataset(not_normalized_ds);
 
     const int max_rows = dataset->max_rows;
     const int num_features = dataset->max_cols;
 
-    for (int col = 0; col < num_features; col++) {
-        if(col != price_index){
+    for (int col = 0; col < num_features; col++)
+    {
+        if (col != price_index)
+        {
             double min_val = dataset->data[0][col];
             double max_val = dataset->data[0][col];
 
-            for (int row = 1; row < max_rows; row++) {
+            for (int row = 1; row < max_rows; row++)
+            {
                 const double v = dataset->data[row][col];
-                if (v < min_val) min_val = v;
-                if (v > max_val) max_val = v;
+                if (v < min_val)
+                    min_val = v;
+                if (v > max_val)
+                    max_val = v;
             }
 
-            if (max_val == min_val) {
+            if (max_val == min_val)
+            {
                 normalization_ratios[col] = 0.0;
                 normalization_biases[col] = NORM_MIN;
 
-                for (int row = 0; row < max_rows; row++) {
+                for (int row = 0; row < max_rows; row++)
+                {
                     dataset->data[row][col] = NORM_MIN;
                 }
                 continue;
             }
 
             const double ratio =
-                    (NORM_MAX - NORM_MIN) / (max_val - min_val);
+                (NORM_MAX - NORM_MIN) / (max_val - min_val);
             const double bias =
-                    NORM_MIN - min_val * ratio;
+                NORM_MIN - min_val * ratio;
 
             normalization_ratios[col] = ratio;
             normalization_biases[col] = bias;
 
-            for (int row = 0; row < max_rows; row++) {
+            for (int row = 0; row < max_rows; row++)
+            {
                 dataset->data[row][col] =
-                        dataset->data[row][col] * ratio + bias;
+                    dataset->data[row][col] * ratio + bias;
             }
-        }else{
+        }
+        else
+        {
             normalization_ratios[col] = 1;
             normalization_biases[col] = 0;
         }
     }
+    return dataset;
 }
 
-void convert_to_normalized(
-        Dataset* dataset,
-        double* normalization_ratios,
-        double* normalization_biases
-) {
-    if (!dataset || !dataset->data || dataset->max_rows <= 0 || dataset->max_cols <= 1) {
-        return;
+Dataset *convert_to_normalized(
+    Dataset *not_normalized_ds,
+    double *normalization_ratios,
+    double *normalization_biases)
+{
+    if (!not_normalized_ds || !not_normalized_ds->data || not_normalized_ds->max_rows <= 0 || not_normalized_ds->max_cols <= 1)
+    {
+        return not_normalized_ds;
     }
+    Dataset* dataset = copy_dataset(not_normalized_ds);
 
     const int max_rows = dataset->max_rows;
     const int num_features = dataset->max_cols;
 
-    for (int col = 0; col < num_features; col++) {
+    for (int col = 0; col < num_features; col++)
+    {
         const double ratio = normalization_ratios[col];
         const double bias = normalization_biases[col];
 
-        for (int row = 0; row < max_rows; row++) {
+        for (int row = 0; row < max_rows; row++)
+        {
             dataset->data[row][col] =
-                    dataset->data[row][col] * ratio + bias;
+                dataset->data[row][col] * ratio + bias;
         }
     }
+    return dataset;
 }
 
 void analyze_points(const double *x, const double *y, int n, double *slope, double *intercept, double *correlation)
@@ -153,8 +183,13 @@ void dataset_split_train_test(Dataset *dataset, Dataset **train_data_ptr, Datase
         if (arrayIndexesForTrain[i])
         {
             dataset_copy_row(dataset, train, i, train_i++);
-        } else {
+        }
+        else
+        {
             dataset_copy_row(dataset, test, i, test_i++);
         }
     }
+
+    *train_data_ptr = train;
+    *test_data_ptr = test;
 }

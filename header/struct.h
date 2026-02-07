@@ -15,10 +15,10 @@ typedef struct
     double learning_rate;
     int epochs;
     double *weights_out;
-    int bias_out;
+    double bias_out;
 } Weights;
 
-Weights* weights_new(double learning_rate, int epochs, int feature_count);
+Weights* weights_new(double learning_rate, int epochs, int count);
 void weights_free(Weights *weights);
 
 Dataset* dataset_new(int max_rows, int max_cols);
