@@ -4,6 +4,7 @@
 #include <preprocess.h>
 #include <stdlib.h>
 #include <train.h>
+#include <string.h>
 
 Weights *make_model(Dataset *train_ds, int target_i, double learning_rate, int epochs)
 {
@@ -134,6 +135,7 @@ void custom_home_price_prediction(
     {
         if (i == price_column_i)
         {
+            input_row[price_column_i] = 0;
             continue;
         }
 
@@ -164,13 +166,47 @@ void custom_home_price_prediction(
     wait_for_enter_key("continue");
 }
 
+char **column_names_add_custom(char **src, int old_count)
+{
+    char **dst = malloc(sizeof(char *) * (old_count + 1));
+    if (!dst)
+        return NULL;
+
+    for (int i = 0; i <= old_count; i++)
+    {
+        dst[i] = malloc(sizeof(char) * 512);
+        if (i == old_count)
+        {
+            strcpy(dst[i], "custom feature");
+        }
+        else
+        {
+            strcpy(dst[i], src[i]);
+        }
+    }
+
+    return dst;
+}
+
+double custom_formula(double *row)
+{
+    double median_income = row[7];
+    double housing_median_age = row[2];
+    double is_INLAND = row[10];
+
+    // median_income ^ 2 + 0.5 * age - 2 * is_inland
+    return (median_income * median_income) + 0.5 * housing_median_age - 2.0 * is_INLAND;
+}
+
 int command_loop()
 {
     const int price_column_i = 8;
 
+    char **column_names_org;
     char **column_names;
 
-    Dataset *main_ds = read_from_csv_to_dataset(
+    _Bool custom_feature_added = 0;
+    Dataset *original_ds = read_from_csv_to_dataset(
         "housingprices.csv",
         (int[]){9},
         1,
@@ -178,12 +214,20 @@ int command_loop()
             (OHE_Column){
                 .ohe_values = (char *[]){"<1H OCEAN", "INLAND", "NEAR BAY", "NEAR OCEAN", "ISLAND"},
                 .count = 5}},
-        &column_names);
+        &column_names_org);
+
+    column_names = column_names_org;
+
+    Dataset *main_ds = original_ds;
+
+    Dataset *cf_added_ds = dataset_add_custom_feature(original_ds, custom_formula);
+
+    char **column_names_cf = column_names_add_custom(column_names_org, original_ds->max_cols);
 
     Dataset *train_ds = NULL, *test_ds = NULL;
     Weights *weights_model = NULL;
 
-    double normalization_ratios[main_ds->max_cols], normalization_biases[main_ds->max_cols];
+    double normalization_ratios[cf_added_ds->max_cols], normalization_biases[cf_added_ds->max_cols];
 
     // input command loop
     _Bool continue_run = 1;
@@ -195,11 +239,15 @@ int command_loop()
                "3. Find weights and produce the model with gradian decent - linear regression\n"
                "4. Check the model performance and percision\n"
                "5. Custom home price prediction\n"
-               "6. Exit\n\n");
+               "6. Add\\Remove custom feature to main dataset (%c)\n"
+               "7. Exit\n\n",
+               custom_feature_added ? 'x' : ' ');
 
         printf(":: ");
 
-        int command_code = getchar() - '0';
+        char input_cmd[10];
+        scanf("%s", input_cmd);
+        int command_code = strtol(input_cmd, NULL, 0);
 
         switch (command_code)
         {
@@ -225,8 +273,41 @@ int command_loop()
                 main_ds->max_cols,
                 price_column_i);
             break;
-
         case 6:
+            if (custom_feature_added)
+            { // remove custom feature
+                main_ds = original_ds;
+                column_names = column_names_org;
+
+                if (test_ds)
+                    dataset_free(test_ds);
+                if (train_ds)
+                    dataset_free(train_ds);
+                if (weights_model)
+                    weights_free(weights_model);
+
+                test_ds = train_ds = weights_model = NULL;
+
+                custom_feature_added = 0;
+            }
+            else
+            { // add custom feature
+                main_ds = cf_added_ds;
+                column_names = column_names_cf;
+
+                if (test_ds)
+                    dataset_free(test_ds);
+                if (train_ds)
+                    dataset_free(train_ds);
+                if (weights_model)
+                    weights_free(weights_model);
+
+                test_ds = train_ds = weights_model = NULL;
+
+                custom_feature_added = 1;
+            }
+            break;
+        case 7:
             continue_run = 0;
             break;
 
@@ -238,11 +319,16 @@ int command_loop()
         }
     }
 
-    for (int i = 0; i < main_ds->max_cols; i++)
+    for (int i = 0; i < original_ds->max_cols; i++)
     {
-        free(column_names[i]);
+        free(column_names_org[i]);
     }
-    free(column_names);
+    free(column_names_org);
+    for (int i = 0; i < cf_added_ds->max_cols; i++)
+    {
+        free(column_names_cf[i]);
+    }
+    free(column_names_cf);
 
     dataset_free(main_ds);
     if (test_ds)

@@ -1,6 +1,6 @@
 #include <preprocess.h>
 #include <stdlib.h>
-#include<math.h>
+#include <math.h>
 #include <time.h>
 
 static Dataset *copy_dataset(Dataset *src)
@@ -13,7 +13,45 @@ static Dataset *copy_dataset(Dataset *src)
     return dataset;
 }
 
-Dataset* dataset_normalize_min_max(
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include "struct.h"
+
+Dataset *dataset_add_custom_feature(
+    const Dataset *src,
+    double (*formula)(double *row))
+{
+    if (!src || !formula)
+        return NULL;
+
+    int rows = src->max_rows;
+    int old_cols = src->max_cols;
+    int new_cols = old_cols + 1;
+
+    Dataset *dst = dataset_new(rows, new_cols);
+
+    // copy
+    for (int r = 0; r < rows; r++)
+    {
+        for (int c = 0; c < old_cols; c++)
+        {
+            dst->data[r][c] = src->data[r][c];
+        }
+    }
+
+    // calc
+    for (int r = 0; r < rows; r++)
+    {
+        double *row = src->data[r];
+        double value = formula(row);
+        dst->data[r][old_cols] = value;
+    }
+
+    return dst;
+}
+
+Dataset *dataset_normalize_min_max(
     Dataset *not_normalized_ds,
     double *normalization_ratios,
     double *normalization_biases,
@@ -24,7 +62,7 @@ Dataset* dataset_normalize_min_max(
     {
         return not_normalized_ds;
     }
-    Dataset* dataset = copy_dataset(not_normalized_ds);
+    Dataset *dataset = copy_dataset(not_normalized_ds);
 
     const int max_rows = dataset->max_rows;
     const int num_features = dataset->max_cols;
@@ -89,7 +127,7 @@ Dataset *convert_to_normalized(
     {
         return not_normalized_ds;
     }
-    Dataset* dataset = copy_dataset(not_normalized_ds);
+    Dataset *dataset = copy_dataset(not_normalized_ds);
 
     const int max_rows = dataset->max_rows;
     const int num_features = dataset->max_cols;
