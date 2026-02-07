@@ -1,67 +1,100 @@
-#include<train.h>
+#include <train.h>
 #include <math.h>
+#include <input_utils.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <string.h>
 #include <stddef.h>
 
-
-void linear_regression_calculate_weights(Dataset *data, Weights *weights_init)
+void linear_regression_calculate_weights(Dataset *data, Weights *weights_init, int target_i)
 {
-
-    const int learning_rate = weights_init->learning_rate, epochs = weights_init->epochs;
+    const double learning_rate = weights_init->learning_rate;
+    const int epochs = weights_init->epochs;
 
     const int max_rows = data->max_rows;
     const int max_cols = data->max_cols;
-    const int num_features = max_cols - 1; // sotoon akhar target(price)(y)
 
-    // 10 ha ro be 9 taghir bedid agar encode nakardid
-    double weights[num_features];
-    // initialize::
-    for (int i = 0; i < num_features; i++) {
-        weights[i] = 0;
+    double weights[max_cols];
+
+    // initialize
+    for (int j = 0; j < max_cols; j++)
+    {
+        weights[j] = 0.0;
     }
 
     double bias = 0.0;
+    volatile int cancel_training = 0;
+    for (int epoch = 0; epoch < epochs; epoch++)
+    {
 
-    // Training loop
-
-    for (int epoch = 0; epoch < epochs; epoch++) {
-        double grad_weights[num_features];
-        // initialize::
-        for (int i = 0; i < num_features; i++) {
-            grad_weights[i] = 0.0;
+        if (cross_platform_kbhit())
+        {
+            char c = get_key_pressed();
+            if (c == 's' || c == 'S')
+            {
+                cancel_training = 1;
+            }
+        }
+        if (cancel_training)
+        {
+            printf("\nTraining stopped by user\n");
+            break;
         }
 
+        double grad_weights[max_cols];
+        for (int j = 0; j < max_cols; j++)
+        {
+            grad_weights[j] = 0.0;
+        }
         double grad_bias = 0.0;
 
-        // Calculate gradients
-        for (int i = 0; i < max_rows; i++) {
-            // Predict
+        for (int i = 0; i < max_rows; i++)
+        {
+
             double y_hat = bias;
-            for (int j = 0; j < num_features; j++) {
+
+            for (int j = 0; j < max_cols; j++)
+            {
+                if (j == target_i)
+                    continue;
                 y_hat += weights[j] * data->data[i][j];
             }
-            double error = y_hat - data->data[i][num_features];
 
-            for (int j = 0; j < num_features; j++) {
+            double error = y_hat - data->data[i][target_i];
+
+            for (int j = 0; j < max_cols; j++)
+            {
+                if (j == target_i)
+                    continue;
                 grad_weights[j] += error * data->data[i][j];
             }
+
             grad_bias += error;
         }
 
-        // Update weights and bias
-        for (int j = 0; j < num_features; j++) {
+        for (int j = 0; j < max_cols; j++)
+        {
+            if (j == target_i)
+                continue;
             weights[j] -= learning_rate * (grad_weights[j] / max_rows);
         }
         bias -= learning_rate * (grad_bias / max_rows);
 
-        // har 100 epoch vaziat ro gozaresh bede
-        if (epoch % 100 == 0) {
+        // Report
+        if (epoch % 100 == 0)
+        {
             double mse = 0;
-            for (int i = 0; i < max_rows; i++) {
+            for (int i = 0; i < max_rows; i++)
+            {
                 double pred = bias;
-                for (int j = 0; j < num_features; j++) {
+                for (int j = 0; j < max_cols; j++)
+                {
+                    if (j == target_i)
+                        continue;
                     pred += weights[j] * data->data[i][j];
                 }
-                double diff = pred - data->data[i][num_features];
+                double diff = pred - data->data[i][target_i];
                 mse += diff * diff;
             }
             mse /= max_rows;
@@ -69,12 +102,15 @@ void linear_regression_calculate_weights(Dataset *data, Weights *weights_init)
         }
     }
 
-    // Print final model
-    printf("\nFinal Model:\n");
-    printf("Bias: %.4f\n", bias);
+    // Output
+    // printf("\nFinal Model:\n");
+    // printf("Bias: %.4f\n", bias);
     weights_init->bias_out = bias;
-    for (int j = 0; j < num_features; j++) {
-        printf("Weight[%d]: %.4f\n", j, weights[j]);
+
+    for (int j = 0; j < max_cols; j++)
+    {
+        // printf("Weight[%d]: %.4f%s\n", j, weights[j],
+        //    (j == target_i ? " (ignored target)" : ""));
         weights_init->weights_out[j] = weights[j];
     }
 }
@@ -157,8 +193,8 @@ void calculate_model_performance_metrics(
         const double err = y_true - y_pred;
         sum_sq_err += err * err;
 
-        // avoid division by zero (or near zero)
-        if (fabs(y_true) > 1e-12) {
+        if (fabs(y_true) > 1e-12)
+        {
             sum_ape += fabs(err / y_true);
             mape_valid_count++;
         }
@@ -171,11 +207,8 @@ void calculate_model_performance_metrics(
         mape = (sum_ape / (double)mape_valid_count) * 100.0;
     }
 
-    // keep your previous scaling behavior for int output
-    const double MSE_SCALE = 10000.0;
-
-    *MSE = (int)llround(mse * MSE_SCALE);
-    *MAPE = (int)llround(mape);
+    *MSE = mse;
+    *MAPE = mape;
 }
 
 

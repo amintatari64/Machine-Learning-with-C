@@ -4,6 +4,18 @@
 #include <string.h>
 #include <ctype.h>
 
+void flush_stdin()
+{
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF)
+        ;
+}
+
+void wait_for_enter_key(const char *message)
+{
+    printf("\nPress Enter to %s ...", message);
+    getchar(); // now this truly waits for Enter
+}
 
 static int find_ohe_index(const int *ohe_indexes, int ohe_count, int col)
 {
@@ -32,10 +44,9 @@ Dataset *read_from_csv_to_dataset(
     int *ohe_indexes,
     int ohe_count,
     const OHE_Column *ohe_maps,
-    char ***columnNames,
-    int *count)
+    char ***columnNames)
 {
-    return read_from_stream_to_dataset(fopen(csv_file, "r"), ohe_indexes, ohe_count, ohe_maps, columnNames, count);
+    return read_from_stream_to_dataset(fopen(csv_file, "r"), ohe_indexes, ohe_count, ohe_maps, columnNames);
 }
 
 // custom features here
@@ -44,8 +55,7 @@ Dataset *read_from_stream_to_dataset(
     int *ohe_indexes,
     int ohe_count,
     const OHE_Column *ohe_maps,
-    char ***columnNames,
-    int *count)
+    char ***columnNames)
 {
     FILE *fp = stream;
     if (!fp)
@@ -81,11 +91,6 @@ Dataset *read_from_stream_to_dataset(
         {
             final_cols += 1;
         }
-    }
-
-    if (count)
-    {
-        *count = final_cols;
     }
 
     if (columnNames)
@@ -204,3 +209,61 @@ Dataset *read_from_stream_to_dataset(
     fclose(fp);
     return d;
 }
+
+// START - key handling - AI written
+
+#ifdef _WIN32
+#include <conio.h>
+#else
+#include <unistd.h>
+#include <termios.h>
+#include <fcntl.h>
+
+int linux_kbhit(void)
+{
+    struct termios oldt, newt;
+    int ch;
+    int oldf;
+
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ICANON | ECHO);
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+
+    oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
+    fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
+
+    ch = getchar();
+
+    tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+    fcntl(STDIN_FILENO, F_SETFL, oldf);
+
+    if (ch != EOF)
+    {
+        ungetc(ch, stdin);
+        return 1;
+    }
+
+    return 0;
+}
+#endif
+
+//
+int cross_platform_kbhit(void)
+{
+#ifdef _WIN32
+    return _kbhit();
+#else
+    return linux_kbhit();
+#endif
+}
+char get_key_pressed(void)
+{
+#ifdef _WIN32
+    return _getch();
+#else
+    return getchar();
+#endif
+}
+
+// END - key handling - AI written
