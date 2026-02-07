@@ -76,11 +76,20 @@ void plot_price_versus_features(Dataset *d, char **column_names, const int price
     printf("\nPLOT:: ");
     scanf("%d", &p_i);
 
-    while (p_i != -1)
+    while (p_i >= 0)
     {
-        char title[512];
-        sprintf(title, "%s (vs) price", column_names[p_i]);
-        plot_points_with_regression(columns[p_i], columns[price_column_i], &analysis[p_i][0], &analysis[p_i][1], &analysis[p_i][2], d->max_rows, title, column_names[p_i], "price");
+        if (p_i > d->max_cols)
+        {
+            printf("Enter a valid plot id\n");
+            flush_stdin();
+            wait_for_enter_key("continue");
+        }
+        else
+        {
+            char title[512];
+            sprintf(title, "%s (vs) price", column_names[p_i]);
+            plot_points_with_regression(columns[p_i], columns[price_column_i], &analysis[p_i][0], &analysis[p_i][1], &analysis[p_i][2], d->max_rows, title, column_names[p_i], "price");
+        }
 
         printf("PLOT:: ");
         scanf("%d", &p_i);

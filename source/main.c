@@ -18,10 +18,13 @@ void split_train_test(Dataset *main_ds, Dataset **train_ds, Dataset **test_ds, d
     if (*test_ds)
         dataset_free(*test_ds);
 
-    float train_ratio;
-    printf("Enter train ratio from 0.0 to 1.0 :: ");
-    scanf("%f", &train_ratio);
-    flush_stdin();
+    float train_ratio = -1;
+    while (1 < train_ratio || train_ratio <= 0)
+    {
+        printf("Enter train ratio from 0.0 to 1.0 :: ");
+        scanf("%f", &train_ratio);
+        flush_stdin();
+    }
 
     dataset_split_train_test(main_ds, train_ds, test_ds, train_ratio);
     printf("Dataset successfully loaded with %d train and %d test data records from all %d data record\n", (*train_ds)->max_rows, (*test_ds)->max_rows, main_ds->max_rows);
@@ -38,6 +41,11 @@ void caclulate_model(Dataset *train_ds, Weights **model_ptr, int price_column_i)
 {
     if (train_ds)
     {
+        if (*model_ptr)
+        {
+            weights_free(*model_ptr);
+        }
+        
         double lr;
         int ep;
         printf("Model calculation : \nEnter a learning rate : ");
@@ -64,7 +72,8 @@ void caclulate_model(Dataset *train_ds, Weights **model_ptr, int price_column_i)
     }
     else
     {
-        printf("Train dataset not loaded yet. Please load the dataset with (2) first.");
+        printf("Train dataset not loaded yet. Please load the dataset with (2) first.\n");
+        flush_stdin();
     }
     wait_for_enter_key("continue");
 }
@@ -103,7 +112,7 @@ int command_loop()
         &column_names);
 
     Dataset *train_ds = NULL, *test_ds = NULL;
-    Weights *weights_model;
+    Weights *weights_model = NULL;
 
     double normalization_ratios[main_ds->max_cols], normalization_biases[main_ds->max_cols];
 
