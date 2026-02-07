@@ -40,11 +40,12 @@ void dataset_free(Dataset *dataset)
     free(dataset);
 }
 
-void dataset_copy_row(Dataset *src, Dataset *dst, unsigned fromIndexSrc, unsigned toIndexDst) {
+void dataset_copy_row(Dataset *src, Dataset *dst, unsigned fromIndexSrc, unsigned toIndexDst)
+{
     assert(src->max_cols <= dst->max_cols);
-    
+
     for (int i = 0; i < src->max_cols; i++)
     {
-        dst->data[toIndexDst][i] = src->data[fromIndexSrc][i]; 
+        dst->data[toIndexDst][i] = src->data[fromIndexSrc][i];
     }
 }

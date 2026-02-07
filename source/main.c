@@ -37,7 +37,7 @@ void split_train_test(Dataset *main_ds, Dataset **train_ds, Dataset **test_ds, d
 
     wait_for_enter_key("continue");
 }
-void caclulate_model(Dataset *train_ds, Weights **model_ptr, int price_column_i)
+void caclulate_model(Dataset *train_ds, Weights **model_ptr, char **column_names, int price_column_i)
 {
     if (train_ds)
     {
@@ -62,14 +62,14 @@ void caclulate_model(Dataset *train_ds, Weights **model_ptr, int price_column_i)
         {
             if (col_i != price_column_i)
             {
-                printf(" |%lf| ", (*model_ptr)->weights_out[col_i]);
+                printf(" |%s: %lf| ", column_names[col_i], (*model_ptr)->weights_out[col_i]);
             }
             else
             {
-                printf(" |--| ");
+                printf(" |price: --| ");
             }
         }
-        printf(" + %lf", (*model_ptr)->bias_out);
+        printf(" + bias : %lf", (*model_ptr)->bias_out);
     }
     else
     {
@@ -211,7 +211,7 @@ int command_loop()
             split_train_test(main_ds, &train_ds, &test_ds, normalization_ratios, normalization_biases, price_column_i);
             break;
         case 3:
-            caclulate_model(train_ds, &weights_model, price_column_i);
+            caclulate_model(train_ds, &weights_model, column_names, price_column_i);
             break;
         case 4:
             check_model_performance(test_ds, weights_model, normalization_ratios, normalization_biases, price_column_i);
@@ -238,6 +238,12 @@ int command_loop()
         }
     }
 
+    for (int i = 0; i < main_ds->max_cols; i++)
+    {
+        free(column_names[i]);
+    }
+    free(column_names);
+
     dataset_free(main_ds);
     if (test_ds)
         dataset_free(test_ds);
@@ -245,12 +251,6 @@ int command_loop()
         dataset_free(train_ds);
     if (weights_model)
         weights_free(weights_model);
-
-    for (int i = 0; i < main_ds->max_cols; i++)
-    {
-        free(column_names[i]);
-    }
-    free(column_names);
 
     return 0;
 }
