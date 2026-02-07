@@ -16,6 +16,7 @@ void linear_regression_calculate_weights(Dataset *data, Weights *weights_init, i
     const int max_cols = data->max_cols;
 
     double weights[max_cols];
+    weights[target_i] = 0;
 
     // initialize
     for (int j = 0; j < max_cols; j++)
@@ -116,22 +117,10 @@ void linear_regression_calculate_weights(Dataset *data, Weights *weights_init, i
 }
 
 
-/*
-    Returns: number of predicted values (equals dataset row count)
-
-    Inputs:
-      - test_dataset_normalized
-      - model: trained model weights and bias
-      - y_pred_prices: pre-allocated array to store predicted prices
-
-    How to use:
-        y_pred_prices = malloc(sizeof(double) * test_dataset_normalized->max_rows);
-        int n = predict_prices_from_dataset(ds, model, y_pred_prices, y_index);
- */
-int predict_prices_from_dataset(
+void predict_prices_from_dataset(
         const Dataset *test_dataset_normalized,
         const Weights *model,
-        double *y_pred_prices,
+        double *y_pred_prices
 ) {
     // Validate pointers
     if (!test_dataset_normalized || !model || !model->weights_out || !y_pred_prices) {
@@ -145,7 +134,6 @@ int predict_prices_from_dataset(
     if (rows <= 0 || cols <= 1 ) {
         return 0;
     }
-
 
     const int num_features = cols;
 
@@ -165,22 +153,19 @@ int predict_prices_from_dataset(
         // Store predicted price
         y_pred_prices[i] = y_pred;
     }
-
-    // Return number of predictions
-    return rows;
 }
 
 
-void calculate_model_performance_metrics(
-        int *MSE,
-        int *MAPE,
+void calculate_mse_mape(
+        double *MSE,
+        double *MAPE,
         const double *y_pred_prices,
         const double *y_true_prices,
         int size
 ) {
-    if (!MSE || !MAPE || !y_pred_prices || !y_true_prices || size <= 0) {
-        return;
-    }
+    // if (!MSE || !MAPE || !y_pred_prices || !y_true_prices || size <= 0) {
+    //     return;
+    // }
 
     double sum_sq_err = 0.0;
     double sum_ape = 0.0;

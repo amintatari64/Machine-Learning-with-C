@@ -25,7 +25,7 @@ void plot_actual_vs_predicted(double *x_real, double *y_pred, int count, double 
     fprintf(gp, "set label 1 sprintf('MSE = %.6f', %f) at graph 0.02, 0.05\n", mse, mse);
     fprintf(gp, "set label 2 sprintf('MAPE = %.6f', %f) at graph 0.02, 0.10\n", mape, mape);
 
-    fprintf(gp, "plot x title 'y = x' with lines lw 2 lc rgb 'red', '-' using 1:2 with points pt 7 ps 1.2 lc rgb 'blue' notitle\n");
+    fprintf(gp, "plot '-' using 1:2 with points pt 7 ps 0.4 lc rgb 'blue' notitle, x title 'y = x' with lines lw 2 lc rgb 'red'\n");
 
     for (int i = 0; i < count; i++)
     {

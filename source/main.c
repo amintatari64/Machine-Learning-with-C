@@ -45,11 +45,12 @@ void caclulate_model(Dataset *train_ds, Weights **model_ptr, int price_column_i)
         {
             weights_free(*model_ptr);
         }
-        
+
         double lr;
         int ep;
         printf("Model calculation : \nEnter a learning rate : ");
         scanf("%lf", &lr);
+        flush_stdin();
         printf("Enter epoch count : ");
         scanf("%d", &ep);
         printf("\nModel calculation may take a long time. if you want to stop the process, press 'S' key on keyboard\n");
@@ -80,18 +81,31 @@ void caclulate_model(Dataset *train_ds, Weights **model_ptr, int price_column_i)
 
 void check_model_performance(Dataset *test_ds, Weights *weights_model, double *normalization_ratios, double *normalization_biases, int price_column_i)
 {
+
     if (weights_model)
     {
+        double y_predicts[test_ds->max_rows];
+        double y_reals[test_ds->max_rows];
+
         Dataset *test_ds_norm = convert_to_normalized(test_ds, normalization_ratios, normalization_biases);
+        predict_prices_from_dataset(test_ds_norm, weights_model, y_predicts);
+        for (int r = 0; r < test_ds_norm->max_rows; r++)
+        {
+            y_reals[r] = test_ds_norm->data[r][price_column_i];
+        }
+
         double MSE, MAPE;
-        calculate_model_performance_metrics(&MSE, &MAPE, test_ds_norm, weights_model, price_column_i);
+        calculate_mse_mape(&MSE, &MAPE, y_predicts, y_reals, test_ds_norm->max_rows);
         printf("MSE : %lf\nMAPE : %lf\n", MSE, MAPE);
+
+        plot_actual_vs_predicted(y_reals, y_predicts, test_ds_norm->max_rows, MSE, MAPE);
     }
     else
     {
         printf("Weights model not calculated yet. Please calculate the model with (3) first.\n");
+        flush_stdin();
     }
-    flush_stdin();
+
     wait_for_enter_key("continue");
 }
 
