@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <train.h>
 #include <string.h>
+#include <math.h>
 
 Weights *make_model(Dataset *train_ds, int target_i, double learning_rate, int epochs)
 {
@@ -190,12 +191,25 @@ char **column_names_add_custom(char **src, int old_count)
 
 double custom_formula(double *row)
 {
-    double median_income = row[7];
-    double housing_median_age = row[2];
-    double is_INLAND = row[10];
 
-    // median_income ^ 2 + 0.5 * age - 2 * is_inland
-    return (median_income * median_income) + 0.5 * housing_median_age - 2.0 * is_INLAND;
+    double median_income = row[7];
+    double total_rooms   = row[3];
+    double is_inland     = row[10];
+
+    if (median_income < 0.0) median_income = 0.0;
+    if (total_rooms < 0.0) total_rooms = 0.0;
+
+    double income_nl = pow(median_income + 1.0, 1.5);
+
+    double size_factor = sqrt(total_rooms + 1.0);
+
+    double geo_factor = 1.0 - 0.55 * is_inland;
+
+    double income_log = 0.35 * log(median_income + 1.0);
+
+    double custom = income_nl * size_factor * geo_factor + income_log;
+
+    return custom;
 }
 
 int command_loop()
